@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import type { Todo } from "./types/todo";
 
 const newTodo = ref("");
-const todos = ref<Todo[]>([]);
+const todos = ref<Todo[]>(JSON.parse(localStorage.getItem("todos") || "[]"));
+
+// 监听todos的变化并保存到localStorage
+watch(
+  todos,
+  (newTodos) => {
+    localStorage.setItem("todos", JSON.stringify(newTodos));
+  },
+  { deep: true }
+);
 
 const addTodo = () => {
   if (newTodo.value.trim()) {
