@@ -1,10 +1,14 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
+// 获取仓库名称作为 base URL
+const base =
+  process.env.NODE_ENV === "production" ? "/todo-list-actions-deploy/" : "/";
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: "./", // 确保资源路径正确
+  base: base, // 添加这行配置
   build: {
     outDir: "dist", // 输出目录
     assetsDir: "assets", // 静态资源目录
