@@ -149,7 +149,7 @@ const handleLinkSelect = (path: string) => {
     ]"
   >
     <!-- 侧边栏切换按钮 -->
-    <div class="fixed top-4 left-4 z-50">
+    <div class="fixed top-4 left-4 z-50" v-if="!isSidebarOpen">
       <button
         @click="isSidebarOpen = true"
         class="p-2 rounded-lg transition-colors duration-300 dark:bg-gray-700 bg-white/70 backdrop-blur shadow-lg hover:shadow-xl"
@@ -174,11 +174,11 @@ const handleLinkSelect = (path: string) => {
     <!-- 侧边栏 -->
     <Transition
       enter-active-class="transition ease-out duration-300"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
+      enter-from-class="opacity-0 translate-x-[-100%]"
+      enter-to-class="opacity-100 translate-x-0"
       leave-active-class="transition ease-in duration-200"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+      leave-from-class="opacity-100 translate-x-0"
+      leave-to-class="opacity-0 translate-x-[-100%]"
     >
       <Sidebar
         v-if="isSidebarOpen"
