@@ -4,7 +4,7 @@ import type { Todo } from "../types/todo";
 import TodoItem from "./TodoItem.vue";
 import TodoFilter from "./TodoFilter.vue";
 
-const props = defineProps<{
+defineProps<{
   todos: Todo[];
   filteredTodos: Todo[];
   filter: "all" | "active" | "completed";
