@@ -41,8 +41,10 @@ const toggleSelect = (id: number) => {
 
 const removeSelected = () => {
   if (selectedTodos.value.size > 0) {
-    emit("removeTodos", Array.from(selectedTodos.value));
-    selectedTodos.value.clear();
+    if (confirm(`确定要删除选中的 ${selectedTodos.value.size} 项吗？`)) {
+      emit("removeTodos", Array.from(selectedTodos.value));
+      selectedTodos.value.clear();
+    }
   }
 };
 </script>
@@ -70,14 +72,14 @@ const removeSelected = () => {
       <div class="flex gap-2">
         <input
           v-model="newTodo"
-          @keyup.enter="addTodo"
           type="text"
           placeholder="添加新的待办事项..."
           class="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white/70 backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          @keyup.enter="addTodo"
         />
         <button
-          @click="addTodo"
           class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0 font-medium"
+          @click="addTodo"
         >
           添加
         </button>
@@ -96,14 +98,11 @@ const removeSelected = () => {
           v-if="selectedTodos.size > 0"
           class="flex justify-between items-center px-4 py-2 bg-red-50 dark:bg-red-900/30 rounded-lg"
         >
-          <span class="text-red-600 dark:text-red-400">
-            已选择 {{ selectedTodos.size }} 项
-          </span>
           <button
+            class="w-full px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
             @click="removeSelected"
-            class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
           >
-            删除选中项
+            删除选中项 ({{ selectedTodos.size }})
           </button>
         </div>
       </Transition>
@@ -124,9 +123,8 @@ const removeSelected = () => {
 
       <!-- 统计信息 -->
       <div class="text-sm text-gray-500 text-center pt-2">
-        总计 {{ todos.length }} 项 / 已完成
-        {{ todos.filter((t) => t.completed).length }} 项 / 未完成
-        {{ todos.filter((t) => !t.completed).length }} 项
+        总计 {{ todos.length }} 项 / 已完成 {{ todos.filter((t) => t.completed).length }} 项 /
+        未完成 {{ todos.filter((t) => !t.completed).length }} 项
       </div>
     </div>
   </div>

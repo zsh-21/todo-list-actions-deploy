@@ -13,9 +13,7 @@ const todos = ref<Todo[]>(JSON.parse(localStorage.getItem("todos") || "[]"));
 type ThemeMode = "light" | "dark" | "system";
 
 // 主题设置
-const themeMode = ref<ThemeMode>(
-  (localStorage.getItem("theme-mode") as ThemeMode) || "system"
-);
+const themeMode = ref<ThemeMode>((localStorage.getItem("theme-mode") as ThemeMode) || "system");
 const isDark = ref(false);
 
 // 更新主题状态
@@ -36,14 +34,12 @@ const updateTheme = (mode: ThemeMode) => {
 updateTheme(themeMode.value);
 
 // 监听系统主题变化
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", (e) => {
-    if (themeMode.value === "system") {
-      isDark.value = e.matches;
-      document.documentElement.classList.toggle("dark", e.matches);
-    }
-  });
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+  if (themeMode.value === "system") {
+    isDark.value = e.matches;
+    document.documentElement.classList.toggle("dark", e.matches);
+  }
+});
 
 // 监听todos的变化并保存到localStorage
 watch(
@@ -61,9 +57,7 @@ const filteredTodos = computed(() => {
       if (filter.value === "completed") return todo.completed;
       return true;
     })
-    .filter((todo) =>
-      todo.text.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
+    .filter((todo) => todo.text.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
 
 // Todo 操作方法
@@ -76,7 +70,6 @@ const addTodo = (text: string) => {
     createdAt: now,
     updatedAt: now,
   });
-  alert("待办事项添加成功！");
 };
 
 const toggleTodo = (todo: Todo) => {
@@ -84,24 +77,17 @@ const toggleTodo = (todo: Todo) => {
 };
 
 const removeTodo = (id: number) => {
-  if (confirm("确定要删除这个待办事项吗？")) {
-    todos.value = todos.value.filter((todo) => todo.id !== id);
-    alert("待办事项已删除！");
-  }
+  todos.value = todos.value.filter((todo) => todo.id !== id);
 };
 
 const updateTodo = (todo: Todo, text: string) => {
   todo.text = text;
   todo.updatedAt = new Date().toISOString();
-  alert("修改已保存！");
 };
 
 // 添加批量删除方法
 const removeTodos = (ids: number[]) => {
-  if (confirm(`确定要删除这 ${ids.length} 个待办事项吗？`)) {
-    todos.value = todos.value.filter((todo) => !ids.includes(todo.id));
-    alert("待办事项已删除！");
-  }
+  todos.value = todos.value.filter((todo) => !ids.includes(todo.id));
 };
 
 // 侧边栏状态
@@ -128,10 +114,10 @@ const handleLinkSelect = (path: string) => {
     ]"
   >
     <!-- 侧边栏切换按钮 -->
-    <div class="fixed top-4 left-4 z-50" v-if="!isSidebarOpen">
+    <div v-if="!isSidebarOpen" class="fixed top-4 left-4 z-50">
       <button
-        @click="isSidebarOpen = true"
         class="p-2 rounded-lg transition-colors duration-300 dark:bg-gray-700 bg-white/70 backdrop-blur shadow-lg hover:shadow-xl"
+        @click="isSidebarOpen = true"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -172,11 +158,7 @@ const handleLinkSelect = (path: string) => {
       </Transition>
     </div>
 
-    <ThemeSwitcher
-      :is-dark="isDark"
-      :theme-mode="themeMode"
-      :update-theme="updateTheme"
-    />
+    <ThemeSwitcher :is-dark="isDark" :theme-mode="themeMode" :update-theme="updateTheme" />
 
     <!-- 主内容区域 -->
     <div class="px-4 sm:px-6">
@@ -212,10 +194,10 @@ const handleLinkSelect = (path: string) => {
         <iframe
           :src="currentPath"
           class="w-full h-full rounded-xl shadow-xl"
-          @load="isLoading = false"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
+          @load="isLoading = false"
         ></iframe>
       </div>
     </div>
