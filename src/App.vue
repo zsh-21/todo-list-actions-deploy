@@ -2,6 +2,7 @@
 import { ref, watch, computed } from "vue";
 import type { Todo } from "./types/todo";
 import { vFocus } from "./directives/focus";
+import Sidebar from "./components/Sidebar.vue";
 
 const newTodo = ref("");
 const searchQuery = ref("");
@@ -124,6 +125,18 @@ const saveEdit = (todo: Todo) => {
 const cancelEdit = () => {
   editingId.value = null;
 };
+
+// 侧边栏状态
+const isSidebarOpen = ref(false);
+const currentPath = ref("/");
+const isLoading = ref(false);
+
+const handleLinkSelect = (path: string) => {
+  currentPath.value = path;
+  if (path !== "/") {
+    isLoading.value = true;
+  }
+};
 </script>
 
 <template>
@@ -135,6 +148,45 @@ const cancelEdit = () => {
         : 'bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100',
     ]"
   >
+    <!-- 侧边栏切换按钮 -->
+    <div class="fixed top-4 left-4 z-50">
+      <button
+        @click="isSidebarOpen = true"
+        class="p-2 rounded-lg transition-colors duration-300 dark:bg-gray-700 bg-white/70 backdrop-blur shadow-lg hover:shadow-xl"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 dark:text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- 侧边栏 -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <Sidebar
+        v-if="isSidebarOpen"
+        @close="isSidebarOpen = false"
+        @select="handleLinkSelect"
+      />
+    </Transition>
+
     <!-- 主题切换按钮组 -->
     <div class="fixed top-4 right-4 flex gap-2 z-50">
       <!-- 手动切换按钮 -->
@@ -204,202 +256,234 @@ const cancelEdit = () => {
       </button>
     </div>
 
-    <div
-      class="max-w-2xl mx-auto dark:bg-gray-800/80 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-4 sm:p-8"
-    >
-      <h1
-        class="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-      >
-        待办事项清单
-      </h1>
-
-      <div class="space-y-4 sm:space-y-6">
-        <!-- 搜索和过滤区 -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索待办事项..."
-            class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl bg-white/70 backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <div class="flex gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-            <button
-              v-for="option in ['all', 'active', 'completed']"
-              :key="option"
-              @click="filter = option as 'all' | 'active' | 'completed'"
-              :class="{
-                'px-4 py-2.5 rounded-xl transition-all duration-300 font-medium shadow-sm whitespace-nowrap': true,
-                'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200/50 hover:shadow-lg hover:translate-y-[-1px]':
-                  filter === option,
-                'bg-white/70 backdrop-blur text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-blue-300 hover:text-blue-600':
-                  filter !== option,
-              }"
-            >
-              {{
-                option === "all"
-                  ? "全部"
-                  : option === "active"
-                  ? "进行中"
-                  : "已完成"
-              }}
-            </button>
-          </div>
-        </div>
-
-        <!-- 添加新待办 -->
-        <div class="flex gap-2">
-          <input
-            v-model="newTodo"
-            @keyup.enter="addTodo"
-            type="text"
-            placeholder="添加新的待办事项..."
-            class="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white/70 backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button
-            @click="addTodo"
-            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0 font-medium"
+    <!-- 主内容区域 -->
+    <div class="px-4 sm:px-6">
+      <!-- 待办事项内容 -->
+      <div v-if="currentPath === '/'">
+        <div
+          class="max-w-2xl mx-auto dark:bg-gray-800/80 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-4 sm:p-8"
+        >
+          <h1
+            class="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
           >
-            添加
-          </button>
-        </div>
+            待办事项清单
+          </h1>
 
-        <!-- 待办列表 -->
-        <ul class="space-y-2.5">
-          <li
-            v-for="todo in filteredTodos"
-            :key="todo.id"
-            class="group flex items-center justify-between p-3 sm:p-4 bg-white/70 backdrop-blur rounded-xl hover:bg-blue-50/80 transition-all duration-200 border border-gray-100 hover:border-blue-200 shadow-sm hover:shadow"
-          >
-            <div class="flex items-center space-x-3 min-w-0 flex-1">
+          <div class="space-y-4 sm:space-y-6">
+            <!-- 搜索和过滤区 -->
+            <div class="flex flex-col sm:flex-row gap-3">
               <input
-                type="checkbox"
-                :checked="todo.completed"
-                @change="toggleTodo(todo)"
-                class="w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                v-model="searchQuery"
+                type="text"
+                placeholder="搜索待办事项..."
+                class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl bg-white/70 backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <div class="flex flex-col min-w-0 flex-1">
-                <!-- 编辑状态 -->
-                <div v-if="editingId === todo.id" class="flex-1 flex gap-2">
-                  <input
-                    v-model="editingText"
-                    type="text"
-                    @keyup.enter="saveEdit(todo)"
-                    @keyup.esc="cancelEdit"
-                    @blur="saveEdit(todo)"
-                    class="flex-1 px-3 py-1.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                    v-focus
-                  />
-                </div>
-
-                <!-- 非编辑状态 -->
-                <div v-else class="flex flex-col gap-1">
-                  <span
-                    :class="{
-                      'text-gray-800 font-medium break-all leading-normal': true,
-                      'line-through text-gray-400': todo.completed,
-                    }"
-                    @dblclick="startEditing(todo)"
-                  >
-                    {{ todo.text }}
-                  </span>
-
-                  <!-- 优化时间显示部分 -->
-                  <div class="flex items-center gap-3 text-xs text-gray-400">
-                    <span class="flex items-center gap-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-3 w-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      {{ formatDate(todo.createdAt) }}
-                    </span>
-                    <span
-                      v-if="todo.updatedAt !== todo.createdAt"
-                      class="flex items-center gap-1"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-3 w-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                      {{ formatDate(todo.updatedAt) }}
-                    </span>
-                  </div>
-                </div>
+              <div
+                class="flex gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar"
+              >
+                <button
+                  v-for="option in ['all', 'active', 'completed']"
+                  :key="option"
+                  @click="filter = option as 'all' | 'active' | 'completed'"
+                  :class="{
+                    'px-4 py-2.5 rounded-xl transition-all duration-300 font-medium shadow-sm whitespace-nowrap': true,
+                    'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200/50 hover:shadow-lg hover:translate-y-[-1px]':
+                      filter === option,
+                    'bg-white/70 backdrop-blur text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-blue-300 hover:text-blue-600':
+                      filter !== option,
+                  }"
+                >
+                  {{
+                    option === "all"
+                      ? "全部"
+                      : option === "active"
+                      ? "进行中"
+                      : "已完成"
+                  }}
+                </button>
               </div>
             </div>
 
-            <div class="flex items-center gap-1 sm:gap-2">
-              <!-- 编辑按钮 -->
+            <!-- 添加新待办 -->
+            <div class="flex gap-2">
+              <input
+                v-model="newTodo"
+                @keyup.enter="addTodo"
+                type="text"
+                placeholder="添加新的待办事项..."
+                class="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white/70 backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
               <button
-                v-if="!todo.completed && editingId !== todo.id"
-                @click="startEditing(todo)"
-                class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all duration-300 p-2 rounded-lg hover:bg-blue-50 flex-shrink-0"
+                @click="addTodo"
+                class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg hover:translate-y-[-1px] active:translate-y-0 font-medium"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </button>
-
-              <!-- 删除按钮 -->
-              <button
-                @click="removeTodo(todo.id)"
-                class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 flex-shrink-0"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
+                添加
               </button>
             </div>
-          </li>
-        </ul>
 
-        <!-- 统计信息 -->
-        <div class="text-sm text-gray-500 text-center pt-2">
-          总计 {{ todos.length }} 项 / 已完成
-          {{ todos.filter((t) => t.completed).length }} 项 / 未完成
-          {{ todos.filter((t) => !t.completed).length }} 项
+            <!-- 待办列表 -->
+            <ul class="space-y-2.5">
+              <li
+                v-for="todo in filteredTodos"
+                :key="todo.id"
+                class="group flex items-center justify-between p-3 sm:p-4 bg-white/70 backdrop-blur rounded-xl hover:bg-blue-50/80 transition-all duration-200 border border-gray-100 hover:border-blue-200 shadow-sm hover:shadow"
+              >
+                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                  <input
+                    type="checkbox"
+                    :checked="todo.completed"
+                    @change="toggleTodo(todo)"
+                    class="w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                  />
+                  <div class="flex flex-col min-w-0 flex-1">
+                    <!-- 编辑状态 -->
+                    <div v-if="editingId === todo.id" class="flex-1 flex gap-2">
+                      <input
+                        v-model="editingText"
+                        type="text"
+                        @keyup.enter="saveEdit(todo)"
+                        @keyup.esc="cancelEdit"
+                        @blur="saveEdit(todo)"
+                        class="flex-1 px-3 py-1.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        v-focus
+                      />
+                    </div>
+
+                    <!-- 非编辑状态 -->
+                    <div v-else class="flex flex-col gap-1">
+                      <span
+                        :class="{
+                          'text-gray-800 font-medium break-all leading-normal': true,
+                          'line-through text-gray-400': todo.completed,
+                        }"
+                        @dblclick="startEditing(todo)"
+                      >
+                        {{ todo.text }}
+                      </span>
+
+                      <!-- 优化时间显示部分 -->
+                      <div
+                        class="flex items-center gap-3 text-xs text-gray-400"
+                      >
+                        <span class="flex items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          {{ formatDate(todo.createdAt) }}
+                        </span>
+                        <span
+                          v-if="todo.updatedAt !== todo.createdAt"
+                          class="flex items-center gap-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          {{ formatDate(todo.updatedAt) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1 sm:gap-2">
+                  <!-- 编辑按钮 -->
+                  <button
+                    v-if="!todo.completed && editingId !== todo.id"
+                    @click="startEditing(todo)"
+                    class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all duration-300 p-2 rounded-lg hover:bg-blue-50 flex-shrink-0"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+
+                  <!-- 删除按钮 -->
+                  <button
+                    @click="removeTodo(todo.id)"
+                    class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 flex-shrink-0"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            </ul>
+
+            <!-- 统计信息 -->
+            <div class="text-sm text-gray-500 text-center pt-2">
+              总计 {{ todos.length }} 项 / 已完成
+              {{ todos.filter((t) => t.completed).length }} 项 / 未完成
+              {{ todos.filter((t) => !t.completed).length }} 项
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- 嵌入的外部页面 -->
+      <div v-else class="h-screen pt-16">
+        <!-- 加载指示器 -->
+        <div
+          v-if="isLoading"
+          class="fixed inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm z-30"
+        >
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"
+          ></div>
+        </div>
+
+        <iframe
+          :src="currentPath"
+          class="w-full h-full rounded-xl shadow-xl"
+          @load="isLoading = false"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
       </div>
     </div>
   </div>
