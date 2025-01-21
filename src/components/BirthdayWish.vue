@@ -139,7 +139,7 @@ onUnmounted(() => {
     <!-- 添加可爱的小熊 -->
     <div class="bears-container">
       <div
-        v-for="(position, index) in ['left', 'right', 'bottom']"
+        v-for="position in ['left', 'right', 'bottom']"
         :key="position"
         :class="['bear', `${position}-bear`]"
         :style="{
