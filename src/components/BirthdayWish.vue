@@ -16,7 +16,7 @@ const nameChars = computed(() =>
 
 // 根据时间变化的特效状态
 const effectState = computed(() => ({
-  confettiIntensity: Math.min(1 + timeElapsed.value / 30, 3),
+  confettiIntensity: Math.min(1 + timeElapsed.value / 60, 2),
   bearScale: 1 + Math.sin(timeElapsed.value / 2) * 0.1,
   messageGlow: Math.abs(Math.sin(timeElapsed.value / 3)) * 20,
   cakeRotation: Math.sin(timeElapsed.value / 4) * 10,
@@ -83,21 +83,23 @@ onMounted(() => {
 
   // 启动五彩纸屑效果
   const frame = () => {
-    confetti({
-      particleCount: Math.floor(3 * effectState.value.confettiIntensity),
-      angle: 60,
-      spread: 55,
-      origin: { x: 0 },
-      colors: ["#ff0000", "#ffd700", "#ff69b4", "#00ff00", "#ff1493"],
-    });
+    if (Math.random() < 0.3) {
+      confetti({
+        particleCount: Math.floor(2 * effectState.value.confettiIntensity),
+        angle: 60,
+        spread: 45,
+        origin: { x: 0 },
+        colors: ["#ffd1dc", "#ffb6c1", "#fff", "#800020", "#990033"],
+      });
 
-    confetti({
-      particleCount: Math.floor(3 * effectState.value.confettiIntensity),
-      angle: 120,
-      spread: 55,
-      origin: { x: 1 },
-      colors: ["#ff0000", "#ffd700", "#ff69b4", "#00ff00", "#ff1493"],
-    });
+      confetti({
+        particleCount: Math.floor(2 * effectState.value.confettiIntensity),
+        angle: 120,
+        spread: 45,
+        origin: { x: 1 },
+        colors: ["#ffd1dc", "#ffb6c1", "#fff", "#800020", "#990033"],
+      });
+    }
 
     requestAnimationFrame(frame);
   };
@@ -136,6 +138,14 @@ onUnmounted(() => {
       <span v-else>🔈</span>
     </button>
 
+    <!-- 修改装饰花朵为玫瑰花 -->
+    <div class="flowers-container">
+      <div class="flower left-flower">🌹</div>
+      <div class="flower right-flower">🌹</div>
+      <div class="flower top-left-flower">🌹</div>
+      <div class="flower top-right-flower">🌹</div>
+    </div>
+
     <!-- 添加可爱的小熊 -->
     <div class="bears-container">
       <div
@@ -167,14 +177,20 @@ onUnmounted(() => {
           {{ char }}
         </span>
       </h1>
-      <p
-        class="message"
-        :style="{
-          textShadow: `0 0 ${effectState.messageGlow}px rgba(255, 255, 255, 0.8)`,
-        }"
-      >
-        {{ message }}
-      </p>
+      <div class="message-banner">
+        <div class="banner-left">🎀</div>
+        <p
+          class="message"
+          :style="{
+            textShadow: `0 0 ${effectState.messageGlow}px rgba(255, 255, 255, 0.8)`,
+          }"
+        >
+          <span v-for="(char, index) in message" :key="index" class="message-char">
+            {{ char }}
+          </span>
+        </p>
+        <div class="banner-right">🎀</div>
+      </div>
 
       <!-- 漂浮的心形 -->
       <div class="hearts-container">
@@ -201,11 +217,11 @@ onUnmounted(() => {
   animation: gradient 15s ease infinite;
   background: linear-gradient(
     45deg,
-    #ff3366 0%,
-    #ff0033 25%,
-    #cc0033 50%,
-    #ff0033 75%,
-    #ff3366 100%
+    #800020 0%,
+    /* 勃艮第红 */ #990033 25%,
+    /* 深玫瑰红 */ #8b0000 50%,
+    /* 暗红色 */ #990033 75%,
+    /* 深玫瑰红 */ #800020 100% /* 勃艮第红 */
   );
   display: flex;
   justify-content: center;
@@ -239,32 +255,33 @@ onUnmounted(() => {
   animation-delay: calc(var(--char-index) * 0.1s);
   min-width: 0.5em;
   text-align: center;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* 增强文字发光效果 */
 }
 
 @keyframes rainbow {
   0% {
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
   }
   20% {
-    color: #ffd700;
-    text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.6);
+    color: #ffd1dc;
+    text-shadow: 2px 2px 4px rgba(255, 209, 220, 0.8);
   }
   40% {
-    color: #00ffff;
-    text-shadow: 2px 2px 4px rgba(0, 255, 255, 0.6);
+    color: #ffb6c1;
+    text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.8);
   }
   60% {
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
   }
   80% {
-    color: #ffd700;
-    text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.6);
+    color: #ffd1dc;
+    text-shadow: 2px 2px 4px rgba(255, 209, 220, 0.8);
   }
   100% {
     color: #fff;
-    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -278,16 +295,97 @@ onUnmounted(() => {
   }
 }
 
-.message {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  transition: text-shadow 0.3s ease;
+.message-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 0 3rem;
 }
 
-.cake {
-  font-size: 5rem;
-  margin-top: 2rem;
-  transition: transform 0.3s ease;
+.banner-left,
+.banner-right {
+  font-size: 2rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.banner-left {
+  left: 0;
+  animation: swing-left 3s ease-in-out infinite;
+}
+
+.banner-right {
+  right: 0;
+  animation: swing-right 3s ease-in-out infinite;
+}
+
+.message {
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  color: #ffd1dc;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  padding: 1rem 2rem;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.1) 80%,
+    transparent
+  );
+  backdrop-filter: blur(5px);
+  border-radius: 3rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  min-width: 300px;
+}
+
+.message::before,
+.message::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.message::before {
+  left: -20px;
+  transform: translateY(-50%);
+}
+
+.message::after {
+  right: -20px;
+  transform: translateY(-50%);
+}
+
+@keyframes swing-left {
+  0%,
+  100% {
+    transform: translateY(-50%) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-50%) rotate(5deg);
+  }
+}
+
+@keyframes swing-right {
+  0%,
+  100% {
+    transform: translateY(-50%) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-50%) rotate(-5deg);
+  }
 }
 
 .hearts-container {
@@ -305,7 +403,7 @@ onUnmounted(() => {
   animation: float 5s infinite linear;
   opacity: 0.8;
   color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 10px rgba(255, 100, 100, 0.5);
 }
 
 @keyframes pulse {
@@ -369,7 +467,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(5px);
   border: none;
   cursor: pointer;
@@ -379,10 +477,11 @@ onUnmounted(() => {
   font-size: 1.5rem;
   transition: all 0.3s ease;
   z-index: 100;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
 .music-control:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
   transform: scale(1.1);
 }
 
@@ -479,6 +578,27 @@ onUnmounted(() => {
   .right-bear {
     right: 2%;
   }
+
+  .message {
+    font-size: 1.4rem;
+    padding: 0.8rem 1.5rem;
+    letter-spacing: 1px;
+    min-width: 250px;
+  }
+
+  .banner-left,
+  .banner-right {
+    font-size: 1.5rem;
+  }
+
+  .message::before,
+  .message::after {
+    width: 20px;
+  }
+
+  .message-banner {
+    padding: 0 2rem;
+  }
 }
 
 /* 添加渐变背景动画 */
@@ -491,6 +611,85 @@ onUnmounted(() => {
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+.flowers-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.flower {
+  position: absolute;
+  font-size: 3.5rem;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+  animation: sway 6s ease-in-out infinite;
+  opacity: 0.85;
+  transform-origin: bottom center;
+}
+
+.left-flower {
+  left: 5%;
+  bottom: 30%;
+  animation-delay: 0s;
+}
+
+.right-flower {
+  right: 5%;
+  bottom: 30%;
+  animation-delay: 1.5s;
+}
+
+.top-left-flower {
+  left: 8%;
+  top: 15%;
+  animation-delay: 0.75s;
+}
+
+.top-right-flower {
+  right: 8%;
+  top: 15%;
+  animation-delay: 2.25s;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-8deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(8deg) scale(0.95);
+  }
+}
+
+/* 调整媒体查询 */
+@media (max-width: 768px) {
+  .flower {
+    font-size: 2.5rem;
+  }
+
+  .left-flower {
+    left: 2%;
+    bottom: 25%;
+  }
+
+  .right-flower {
+    right: 2%;
+    bottom: 25%;
+  }
+
+  .top-left-flower {
+    left: 4%;
+    top: 10%;
+  }
+
+  .top-right-flower {
+    right: 4%;
+    top: 10%;
   }
 }
 </style>
