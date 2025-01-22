@@ -15,18 +15,6 @@ export default [
         ecmaVersion: "latest",
         sourceType: "module",
       },
-      globals: {
-        window: true,
-        document: true,
-        localStorage: true,
-        confirm: true,
-        HTMLAudioElement: true,
-        Audio: true,
-        HTMLElement: true,
-        requestAnimationFrame: true,
-        console: true,
-        alert: true,
-      },
     },
     plugins: {
       "@typescript-eslint": tseslint,
@@ -49,18 +37,6 @@ export default [
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-      },
-      globals: {
-        window: true,
-        document: true,
-        localStorage: true,
-        confirm: true,
-        HTMLAudioElement: true,
-        Audio: true,
-        HTMLElement: true,
-        requestAnimationFrame: true,
-        console: true,
-        alert: true,
       },
     },
     plugins: {
