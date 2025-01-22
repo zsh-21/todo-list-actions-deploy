@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, onUnmounted } from "vue";
 import confetti from "canvas-confetti";
-import Music from "../../public/audio/birthday_music.mp3";
+import Music from "../assets/audio/birthday_music.mp3";
 
 const name = ref("Happy Birthday");
 const message = ref("祝小娅生日快乐🍬，哒哒哒 哒~");
