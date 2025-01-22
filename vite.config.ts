@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
 // 获取仓库名称作为 base URL
-const base = import.meta.env.PROD === "production" ? "/todo-list-actions-deploy/" : "/";
+const base = import.meta.env.PROD ? "/todo-list-actions-deploy/" : "/";
 
 // https://vitejs.dev/config/
 export default defineConfig({
