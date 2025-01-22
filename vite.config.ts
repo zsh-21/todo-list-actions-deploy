@@ -1,38 +1,36 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
-// 获取仓库名称作为 base URL
-const base = import.meta.env.PROD ? "/todo-list-actions-deploy/" : "/";
+// 使用 defineConfig 的类型定义
+export default defineConfig(({ mode }) => {
+  const base = mode === "production" ? "/todo-list-actions-deploy/" : "/";
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  base: base, // 添加这行配置
-  build: {
-    outDir: "dist", // 输出目录
-    assetsDir: "assets", // 静态资源目录
-    sourcemap: false, // 不生成 sourcemap
-    minify: "terser", // 使用 terser 进行压缩
-    terserOptions: {
-      compress: {
-        drop_console: true, // 移除 console
-        drop_debugger: true, // 移除 debugger
+  return {
+    plugins: [vue()],
+    base,
+    build: {
+      outDir: "dist",
+      assetsDir: "assets",
+      sourcemap: false,
+      minify: "terser",
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+        format: {
+          comments: false,
+        },
       },
-      format: {
-        // 删除注释
-        comments: false,
-      },
-    },
-    // tree shaking
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // 将 node_modules 中的代码单独打包
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              return "vendor";
+            }
+          },
         },
       },
     },
-  },
+  };
 });
