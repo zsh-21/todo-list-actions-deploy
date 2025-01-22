@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import type { Todo } from "../types/todo";
-import { vFocus } from "../directives/focus";
 
 const props = defineProps<{
   todo: Todo;
   isSelected: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: "toggle", todo: Todo): void;
-  (e: "remove", id: number): void;
-  (e: "update", text: string): void;
-  (e: "select"): void;
-}>();
+const emit = defineEmits();
 
 const editingText = ref("");
 const isEditing = ref(false);
@@ -59,13 +53,13 @@ const formatDate = (dateString: string) => {
     <div class="flex items-center space-x-3 min-w-0 flex-1">
       <!-- 选择框 -->
       <button
-        @click="emit('select')"
         class="w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-200"
         :class="[
           isSelected
             ? 'border-blue-500 bg-blue-500 text-white'
             : 'border-gray-300 hover:border-blue-400',
         ]"
+        @click="emit('select')"
       >
         <svg
           v-if="isSelected"
@@ -90,11 +84,10 @@ const formatDate = (dateString: string) => {
           <input
             v-model="editingText"
             type="text"
+            class="flex-1 px-3 py-1.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             @keyup.enter="saveEdit"
             @keyup.esc="cancelEdit"
             @blur="saveEdit"
-            class="flex-1 px-3 py-1.5 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            v-focus
           />
         </div>
 
@@ -129,10 +122,7 @@ const formatDate = (dateString: string) => {
               </svg>
               {{ formatDate(todo.createdAt) }}
             </span>
-            <span
-              v-if="todo.updatedAt !== todo.createdAt"
-              class="flex items-center gap-1"
-            >
+            <span v-if="todo.updatedAt !== todo.createdAt" class="flex items-center gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-3 w-3"
@@ -158,8 +148,8 @@ const formatDate = (dateString: string) => {
       <!-- 编辑按钮 -->
       <button
         v-if="!todo.completed && !isEditing"
-        @click="startEditing"
         class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all duration-300 p-2 rounded-lg hover:bg-blue-50 flex-shrink-0"
+        @click="startEditing"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -179,8 +169,8 @@ const formatDate = (dateString: string) => {
 
       <!-- 删除按钮 -->
       <button
-        @click="emit('remove', todo.id)"
         class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-all duration-300 p-2 rounded-lg hover:bg-red-50 flex-shrink-0"
+        @click="emit('remove', todo.id)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
