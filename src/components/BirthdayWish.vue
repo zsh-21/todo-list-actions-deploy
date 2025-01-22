@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import Music from "../../public/audio/birthday_music.mp3";
 
 const name = ref("Happy Birthday");
-const message = ref("祝小娅生日快乐，哒哒哒 哒~");
+const message = ref("祝小娅生日快乐🍬，哒哒哒 哒~");
 const isPlaying = ref(false);
 const audioRef = ref<HTMLAudioElement>();
 const timeElapsed = ref(0);

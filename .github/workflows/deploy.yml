@@ -1,34 +1,56 @@
-name: Deploy to GitHub Pages
+# 将静态内容部署到 GitHub Pages 的简易工作流程
+name: Deploy static content to Pages
 
 on:
+  # 仅在推送到默认分支时运行。
   push:
-    branches:
-      - main # 或者你的默认分支名
+    branches: ["main"]
+
+  # 这个选项可以使你手动在 Action tab 页面触发工作流
+  workflow_dispatch:
+
+# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 允许一个并发的部署
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+# ----分割线：上面的内容与静态网址是一样的，一般不用改-----
 
 jobs:
+  # 单次部署的工作描述
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # 添加写入权限
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
         with:
-          persist-credentials: true # 确保保持认证信息
-
-      - name: Setup Node.js
+          version: 8
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Install Dependencies
-        run: npm install
-
+          node-version: 20
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
       - name: Build
-        run: npm run build
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+        run: pnpm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          branch: main
-          folder: dist
-          token: ${{ secrets.GITHUB_TOKEN }} # 使用默认的 GITHUB_TOKEN
+          # Upload dist repository
+          path: "./dist"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
