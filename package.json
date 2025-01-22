@@ -11,6 +11,11 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "format": "prettier --write ."
   },
+  "lint-staged": {
+    "src/**/!(*stories|test).{vue,js,ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
   "dependencies": {
     "canvas-confetti": "^1.9.3",
     "vue": "^3.5.13",
