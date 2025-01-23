@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, onUnmounted } from "vue";
 import confetti from "canvas-confetti";
-import Music from "../assets/audio/birthday_music.mp3";
+import Music from "../../assets/audio/birthday_music.mp3";
 
 const name = ref("Happy Birthday");
 const message = ref("祝小娅生日快乐🍬，哒哒哒 哒~");
 const isPlaying = ref(false);
 const audioRef = ref<HTMLAudioElement>();
 const timeElapsed = ref(0);
+
+// 存储动画帧ID的引用
+const animationFrameIds = ref<number[]>([]);
 
 // 将 name 拆分成字符数组，并处理空格
 const nameChars = computed(() =>
@@ -36,7 +39,8 @@ const toggleMusic = () => {
 // 更新动画帧
 const updateAnimation = () => {
   timeElapsed.value += 0.05;
-  requestAnimationFrame(updateAnimation);
+  const id = requestAnimationFrame(updateAnimation);
+  animationFrameIds.value.push(id);
 };
 
 // 尝试自动播放音乐
@@ -49,7 +53,6 @@ const tryAutoPlay = async () => {
   } catch (error) {
     console.log("Auto-play failed:", error);
     // 自动播放失败时显示提示
-    alert("点击任意位置开始播放音乐~");
   }
 };
 
@@ -101,7 +104,8 @@ onMounted(() => {
       });
     }
 
-    requestAnimationFrame(frame);
+    const id = requestAnimationFrame(frame);
+    animationFrameIds.value.push(id);
   };
 
   frame();
@@ -122,6 +126,14 @@ onUnmounted(() => {
     audioRef.value.pause();
     audioRef.value = undefined;
   }
+
+  // 取消所有动画帧
+  animationFrameIds.value.forEach((id) => {
+    cancelAnimationFrame(id);
+  });
+
+  // 清理五彩纸屑
+  confetti.reset();
 });
 </script>
 

@@ -17,6 +17,12 @@ export default {
     globals: {
       window: "readonly",
       document: "readonly",
+      localStorage: "readonly",
+      HTMLAudioElement: "readonly",
+      Audio: "readonly",
+      HTMLElement: "readonly",
+      requestAnimationFrame: "readonly",
+      cancelAnimationFrame: "readonly",
       navigator: "readonly",
       console: "readonly",
     },
